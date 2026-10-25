@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
+require_once 'WC_Gateway_PayGate_Rules.php';
 require_once 'WC_Gateway_PayGate_Portal.php';
 require_once 'WC_Gateway_PayGate_Admin_Actions.php';
 require_once 'WC_Gateway_PayGate_Cron.php';

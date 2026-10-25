@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased] (Idealogic fork, based on 1.7.1)
+
+### Fixed
+
+- A browser redirect no longer changes a paid order. It used to be able to fail one, and then hand
+  out the cancel link, when a buyer replayed the PayGate return page after paying.
+- The redirect handler enforces its checksum for every order, and acts on the status from the
+  server-side PayWeb query instead of the status in the browser POST.
+- A redirect or notify that fails its checksum no longer sets the order to Pending. It adds an
+  order note and logs the raw payload.
+- The notify checksum is validated over the unslashed, unescaped values in PayGate's documented
+  field order. Escaping and WordPress's added slashes made genuine notifies fail.
+- The cron and the admin "Query order status" action never move a paid order.
+- An approved redirect completes the order with the PayGate transaction id, whether or not notify
+  is enabled, and order notes name the path taken (Redirect or Notify).
+- A redirect without a final status sends the buyer back to the pay page, not to the cancel link.
+
 ## [[1.7.1]](https://github.com/Payfast/woocommerce-gateway/releases/tag/v1.7.1)
 
 ### Fixed
