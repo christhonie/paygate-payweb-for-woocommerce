@@ -11,7 +11,7 @@ on:
   pull_request_review_comment:
     types: [created, edited, deleted]
   workflow_run:
-    workflows: ['🧪 PR Checks']
+    workflows: ['🧪 PR Checks', 'Test']    # Test is the PHPUnit workflow that #1 adds
     types: [completed]
 
 jobs:
