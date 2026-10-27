@@ -1,0 +1,30 @@
+name: '✅ Merge Eligibility'
+# Keeps the `ready-to-merge` label on a pull request true to the facts GitHub already holds: reviews
+# in, review threads answered, checks green. The work is done by the shared workflow in
+# christhonie/event; see its header. Re-evaluated on every event that can change the answer.
+
+on:
+  pull_request:
+    types: [synchronize, reopened, ready_for_review, converted_to_draft, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted, dismissed]
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+  workflow_run:
+    workflows: ['🧪 PR Checks']
+    types: [completed]
+
+jobs:
+  merge-eligibility:
+    name: Merge eligibility
+    if: >-
+      (github.event_name != 'pull_request' || github.event.label.name != 'ready-to-merge') &&
+      (github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number)
+    uses: christhonie/event/.github/workflows/merge-eligibility.yml@main
+    permissions:
+      pull-requests: write
+      contents: read
+      checks: read
+      statuses: read
+    with:
+      pr: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number }}

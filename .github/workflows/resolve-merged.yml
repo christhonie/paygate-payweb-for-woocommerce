@@ -1,0 +1,27 @@
+name: '🧾 Resolve Merged'
+# Moves the Azure DevOps items a merged pull request names to Resolved and creates their Testing
+# tasks. The work is done by the shared workflow in christhonie/event; see its header. This caller
+# fires on a merge into develop, and by hand (workflow_dispatch) for a missed merge.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number (already merged into develop)
+        required: true
+        type: number
+
+jobs:
+  resolve-merged:
+    name: Resolve merged
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    uses: christhonie/event/.github/workflows/resolve-merged.yml@main
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
+    with:
+      pr: ${{ github.event_name == 'workflow_dispatch' && fromJSON(inputs.pr) || github.event.pull_request.number }}

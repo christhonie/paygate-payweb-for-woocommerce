@@ -1,0 +1,26 @@
+name: '🧪 PR Checks'
+# The one check a pull request into develop or master must pass: every PHP file of the plugin
+# parses. The plugin has no test suite; this gives the merge-eligibility label an honest check to
+# wait on, and catches the syntax slip that would take a site down on activation. Vendored
+# dependencies are not ours to lint.
+
+on:
+  pull_request:
+    branches: [develop, master]
+
+jobs:
+  php-lint:
+    name: PHP syntax
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: php -l over the plugin
+      run: |
+        set -euo pipefail
+        php --version | head -1
+        status=0
+        while IFS= read -r -d '' f; do
+          php -l "$f" >/dev/null || status=1
+        done < <(find paygate-payweb-for-woocommerce -name '*.php' -not -path '*/vendor/*' -print0)
+        echo "checked $(find paygate-payweb-for-woocommerce -name '*.php' -not -path '*/vendor/*' | wc -l) files"
+        exit $status
