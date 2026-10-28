@@ -15,7 +15,7 @@ on:
     types: [created, edited, deleted]
   workflow_run:
     workflows: ['🧪 PR Checks', 'Test']    # Test is the PHPUnit workflow that #1 adds
-    types: [completed]
+    types: [in_progress, completed]    # in_progress clears the label while a rerun is running
 
 jobs:
   merge-eligibility:
