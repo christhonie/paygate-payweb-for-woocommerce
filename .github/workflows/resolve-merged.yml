@@ -1,7 +1,9 @@
 name: '🧾 Resolve Merged'
 # Moves the Azure DevOps items a merged pull request names to Resolved and creates their Testing
-# tasks. The work is done by the shared workflow in christhonie/idealogic-workflows; see its header. This caller
-# fires on a merge into develop, and by hand (workflow_dispatch) for a missed merge.
+# tasks. The work is done by the shared workflow in christhonie/idealogic-workflows; see its
+# header. This caller fires on a merge into develop, and by hand (workflow_dispatch) for a missed
+# merge. A merged fork PR cannot mint the OIDC token; if one ever names a work item, dispatch this
+# workflow with its number, which runs in the base repository.
 
 on:
   pull_request:

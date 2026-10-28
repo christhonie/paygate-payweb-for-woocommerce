@@ -1,7 +1,10 @@
 name: '✅ Merge Eligibility'
 # Keeps the `ready-to-merge` label on a pull request true to the facts GitHub already holds: reviews
 # in, review threads answered, checks green. The work is done by the shared workflow in
-# christhonie/event; see its header. Re-evaluated on every event that can change the answer.
+# christhonie/idealogic-workflows; see its header. Re-evaluated on every event that can change the
+# answer. Fork PRs have a read-only token, so the label is never written for them: correct, since
+# it marks code the maintainer has adopted. A label added by hand is the maintainer's own call and
+# is reconciled on the next review or check event.
 
 on:
   pull_request:
