@@ -279,8 +279,12 @@ class WC_Gateway_PayGate_Portal extends WC_Gateway_PayGate
             $transaction_id = isset($parsed_response[self::TRANSACTION_ID]) ? $parsed_response[self::TRANSACTION_ID] : "";
             $result_desc    = isset($parsed_response[self::RESULT_DESC]) ? $parsed_response[self::RESULT_DESC] : "";
 
-            // Get latest order in case notify has updated first
-            $order = wc_get_order($order_id);
+            // Re-read from storage, bypassing this request's caches: notify may have paid the
+            // order while the PayWeb query ran.
+            $order = self::freshOrder((int)$order_id);
+            if (!$order) {
+                $this->halt();
+            }
             if ($order->is_paid()) {
                 $this->redirectAfterOrder($this->get_return_url($order));
                 $this->halt();

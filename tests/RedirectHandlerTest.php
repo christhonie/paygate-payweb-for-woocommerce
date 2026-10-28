@@ -241,6 +241,7 @@ final class RedirectHandlerTest extends TestCase
         self::assertSame('completed', $paidByNotify->get_status());
         self::assertSame([], $paidByNotify->statusHistory);
         self::assertSame([], $paidByNotify->notes);
+        self::assertSame([self::ORDER_ID], World::$cacheCleared);
         self::assertSame(['https://shop.test/checkout/order-received/691/'], World::$redirects);
     }
 }
