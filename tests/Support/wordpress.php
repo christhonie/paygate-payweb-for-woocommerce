@@ -91,6 +91,11 @@ function wp_magic_quotes_post(array $fields): array
     return array_map(static fn($v) => is_string($v) ? addslashes($v) : $v, $fields);
 }
 
+function clean_post_cache($post)
+{
+    World::$cacheCleared[] = (int)$post;
+}
+
 function esc_html__($text, $domain = 'default')
 {
     return esc_html($text);

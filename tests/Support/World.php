@@ -15,6 +15,8 @@ final class World
     public static array $redirects = [];
     /** @var list<array{level: string, message: string}> */
     public static array $log = [];
+    /** @var list<int> post ids whose cache was cleared */
+    public static array $cacheCleared = [];
 
     public static function reset(): void
     {
@@ -22,6 +24,7 @@ final class World
         self::$transients = [];
         self::$redirects  = [];
         self::$log        = [];
+        self::$cacheCleared = [];
         $_POST            = [];
         $_GET             = [];
     }

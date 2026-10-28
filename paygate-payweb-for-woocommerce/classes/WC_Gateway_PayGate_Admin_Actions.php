@@ -91,6 +91,12 @@ class WC_Gateway_PayGate_Admin_Actions extends WC_Gateway_PayGate
      */
     public static function applyQueryStatus($order, string $transactionStatus, string $responseText): string
     {
+        // Re-read after the PayWeb query: notify may have paid the order while it ran.
+        $order = self::freshOrder($order->get_id());
+        if (!$order) {
+            return $responseText . '<br>Order not found; status unchanged';
+        }
+
         if ($order->is_paid()) {
             // A paid order is never moved to Failed, Pending or Cancelled.
             $responseText .= '<br>Order already paid; status unchanged';

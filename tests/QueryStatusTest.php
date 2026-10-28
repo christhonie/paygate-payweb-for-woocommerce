@@ -34,7 +34,7 @@ final class QueryStatusTest extends TestCase
     #[DataProvider('statuses')]
     public function testAdminQueryLeavesPaidOrder(string $status): void
     {
-        $order = FakeOrder::paid(1);
+        $order = World::addOrder(FakeOrder::paid(1));
 
         $text = WC_Gateway_PayGate_Admin_Actions::applyQueryStatus($order, $status, '');
 
@@ -43,9 +43,29 @@ final class QueryStatusTest extends TestCase
         self::assertStringContainsString('already paid', $text);
     }
 
+    /**
+     * Notify paid the order while the PayWeb query ran. The admin action still holds the copy
+     * it loaded before the query, which says Pending; it must re-read the order from storage
+     * and leave it paid.
+     */
+    #[DataProvider('statuses')]
+    public function testAdminQueryRereadsAnOrderPaidDuringTheQuery(string $status): void
+    {
+        $stale  = new FakeOrder(1, 'pending');
+        $stored = World::addOrder(FakeOrder::paid(1));
+
+        $text = WC_Gateway_PayGate_Admin_Actions::applyQueryStatus($stale, $status, '');
+
+        self::assertSame('completed', $stored->get_status());
+        self::assertSame([], $stored->statusHistory);
+        self::assertSame([], $stale->statusHistory, 'the stale copy must not be written');
+        self::assertSame([1], World::$cacheCleared);
+        self::assertStringContainsString('already paid', $text);
+    }
+
     public function testAdminQueryCompletesUnpaidOrderOnApproval(): void
     {
-        $order = new FakeOrder(1, 'pending');
+        $order = World::addOrder(new FakeOrder(1, 'pending'));
 
         WC_Gateway_PayGate_Admin_Actions::applyQueryStatus($order, '1', '');
 
