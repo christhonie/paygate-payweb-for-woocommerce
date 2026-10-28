@@ -8,8 +8,10 @@
   out the cancel link, when a buyer replayed the PayGate return page after paying.
 - The redirect handler enforces its checksum for every order, and acts on the status from the
   server-side PayWeb query instead of the status in the browser POST.
-- A redirect or notify that fails its checksum no longer sets the order to Pending. It adds an
-  order note and logs the raw payload.
+- A redirect or notify that fails its checksum no longer sets the order to Pending, and its raw
+  payload is logged. A rejected notify adds an order note. A rejected redirect adds none and is
+  sent to the account page: the redirect checksum is now checked before anything that answers
+  with an order-specific URL, so a forged request cannot obtain the order key.
 - The notify checksum is validated over the unslashed, unescaped values in PayGate's documented
   field order. Escaping and WordPress's added slashes made genuine notifies fail.
 - The cron and the admin "Query order status" action never move a paid order.

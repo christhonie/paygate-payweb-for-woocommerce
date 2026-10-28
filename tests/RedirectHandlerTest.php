@@ -72,7 +72,7 @@ final class RedirectHandlerTest extends TestCase
         self::assertSame('2026-10-01 10:00:00', $order->datePaid);
         self::assertCount(1, $order->notes);
         self::assertStringContainsString('Redirect ignored', $order->notes[0]);
-        self::assertSame(['https://shop.test/checkout/order-received/691/'], World::$redirects);
+        self::assertSame(['https://shop.test/checkout/order-received/691/?key=wc_order_691'], World::$redirects);
         self::assertStringNotContainsString('cancel_order', implode(' ', World::$redirects));
         self::assertSame([], $portal->queried, 'a paid order needs no PayWeb query');
     }
@@ -91,10 +91,8 @@ final class RedirectHandlerTest extends TestCase
 
         self::assertSame('pending', $order->get_status());
         self::assertSame([], $order->statusHistory);
-        self::assertCount(1, $order->notes);
-        self::assertStringContainsString('Redirect rejected: checksum failed', $order->notes[0]);
+        self::assertSame([], $order->notes, 'a forged request must not write onto the order');
         self::assertSame([], $portal->queried);
-        self::assertSame(['https://shop.test/checkout/order-pay/691/'], World::$redirects);
     }
 
     public function testInvalidChecksumForPaidOrderChangesNothing(): void
@@ -106,6 +104,32 @@ final class RedirectHandlerTest extends TestCase
 
         self::assertSame('completed', $order->get_status());
         self::assertSame([], $order->statusHistory);
+        self::assertSame([], $order->notes);
+    }
+
+    /**
+     * A forged request - a guessed order number, any pay request id - must not be answered
+     * with a URL that carries the order key, paid or unpaid.
+     */
+    #[DataProvider('anyOrder')]
+    public function testInvalidChecksumNeverRevealsTheOrderKey(FakeOrder $order): void
+    {
+        World::addOrder($order);
+        $portal = TestablePortal::create();
+
+        $this->redirect($portal, '1', str_repeat('0', 32));
+
+        self::assertSame(['https://shop.test/my-account/'], World::$redirects);
+        self::assertStringNotContainsString('wc_order_', implode(' ', World::$redirects));
+    }
+
+    public static function anyOrder(): array
+    {
+        return [
+            'unpaid' => [new FakeOrder(self::ORDER_ID, 'pending')],
+            'paid'   => [FakeOrder::paid(self::ORDER_ID)],
+            'failed' => [new FakeOrder(self::ORDER_ID, 'failed')],
+        ];
     }
 
     public function testInvalidChecksumIsLoggedWithTheRawPayload(): void
@@ -166,7 +190,7 @@ final class RedirectHandlerTest extends TestCase
         self::assertCount(1, $order->notes);
         self::assertStringStartsWith('Response via Redirect: Transaction successful', $order->notes[0]);
         self::assertStringNotContainsString('Notify', $order->notes[0]);
-        self::assertSame(['https://shop.test/checkout/order-received/691/'], World::$redirects);
+        self::assertSame(['https://shop.test/checkout/order-received/691/?key=wc_order_691'], World::$redirects);
     }
 
     public function testDeclineNoteSaysRedirectWithNotifyEnabled(): void
@@ -204,7 +228,7 @@ final class RedirectHandlerTest extends TestCase
         self::assertSame('processing', $order->get_status());
         self::assertSame($historyAfterPayment, $order->statusHistory);
         self::assertCount($notesAfterPayment + 1, $order->notes);
-        self::assertSame(['https://shop.test/checkout/order-received/691/'], World::$redirects);
+        self::assertSame(['https://shop.test/checkout/order-received/691/?key=wc_order_691'], World::$redirects);
     }
 
     /**
@@ -220,7 +244,7 @@ final class RedirectHandlerTest extends TestCase
         $this->redirect($portal, '0');
 
         self::assertSame('pending', $order->get_status());
-        self::assertSame(['https://shop.test/checkout/order-pay/691/'], World::$redirects);
+        self::assertSame(['https://shop.test/checkout/order-pay/691/?pay_for_order=true&key=wc_order_691'], World::$redirects);
     }
 
     /**
@@ -242,6 +266,6 @@ final class RedirectHandlerTest extends TestCase
         self::assertSame([], $paidByNotify->statusHistory);
         self::assertSame([], $paidByNotify->notes);
         self::assertSame([self::ORDER_ID], World::$cacheCleared);
-        self::assertSame(['https://shop.test/checkout/order-received/691/'], World::$redirects);
+        self::assertSame(['https://shop.test/checkout/order-received/691/?key=wc_order_691'], World::$redirects);
     }
 }

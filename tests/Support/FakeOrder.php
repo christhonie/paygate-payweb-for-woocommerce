@@ -12,7 +12,7 @@ class WC_Payment_Gateway
 
     public function get_return_url($order = null)
     {
-        return 'https://shop.test/checkout/order-received/' . $order->get_id() . '/';
+        return 'https://shop.test/checkout/order-received/' . $order->get_id() . '/?key=' . $order->get_order_key();
     }
 }
 
@@ -54,6 +54,12 @@ final class FakeOrder extends WC_Order
     public function get_order_number(): string
     {
         return (string)$this->id;
+    }
+
+    /** WooCommerce's per-order secret: it unlocks the order-received and pay pages. */
+    public function get_order_key(): string
+    {
+        return 'wc_order_' . $this->id;
     }
 
     public function get_customer_id(): int
@@ -116,12 +122,12 @@ final class FakeOrder extends WC_Order
 
     public function get_checkout_payment_url(): string
     {
-        return 'https://shop.test/checkout/order-pay/' . $this->id . '/';
+        return 'https://shop.test/checkout/order-pay/' . $this->id . '/?pay_for_order=true&key=' . $this->get_order_key();
     }
 
     public function get_cancel_order_url(): string
     {
-        return 'https://shop.test/cart/?cancel_order=true&order_id=' . $this->id;
+        return 'https://shop.test/cart/?cancel_order=true&order_key=' . $this->get_order_key() . '&order_id=' . $this->id;
     }
 
     public function get_items(): array

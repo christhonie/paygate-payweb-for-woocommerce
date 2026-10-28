@@ -240,16 +240,10 @@ class WC_Gateway_PayGate_Portal extends WC_Gateway_PayGate
         $pay_request_id = $raw[self::PAY_REQUEST_ID] ?? '';
         $reference      = $this->getOrderReference($order);
 
-        // A paid order is never changed by a browser redirect, whatever it carries. The buyer
-        // may be replaying a page from a payment completed days earlier.
-        if ($order->is_paid()) {
-            $order->add_order_note(
-                'Response via Redirect ignored: the order is already paid.' . self::PAY_REQUEST_ID_TEXT . esc_html($pay_request_id) . self::BR
-            );
-            $this->redirectAfterOrder($this->get_return_url($order));
-            $this->halt();
-        }
-
+        // The checksum comes first, before anything that answers with an order-specific URL:
+        // the order-received and pay URLs carry the order key, so a forged request must not
+        // obtain them. A rejected request writes no order note either, since anyone can send
+        // one for any order number; the log keeps the raw payload.
         if (!WC_Gateway_PayGate_Rules::isValidRedirectChecksum(
             (string)$this->merchant_id,
             $pay_request_id,
@@ -259,10 +253,17 @@ class WC_Gateway_PayGate_Portal extends WC_Gateway_PayGate
             (string)$this->encryption_key
         )) {
             $this->logChecksumFailure('Redirect', $raw);
+            $this->redirectAfterOrder(get_permalink(wc_get_page_id('myaccount')));
+            $this->halt();
+        }
+
+        // A paid order is never changed by a browser redirect, whatever it carries. The buyer
+        // may be replaying a page from a payment completed days earlier.
+        if ($order->is_paid()) {
             $order->add_order_note(
-                'Response via Redirect rejected: checksum failed. Order status unchanged.' . self::PAY_REQUEST_ID_TEXT . esc_html($pay_request_id) . self::BR
+                'Response via Redirect ignored: the order is already paid.' . self::PAY_REQUEST_ID_TEXT . esc_html($pay_request_id) . self::BR
             );
-            $this->redirectAfterOrder($order->get_checkout_payment_url());
+            $this->redirectAfterOrder($this->get_return_url($order));
             $this->halt();
         }
 

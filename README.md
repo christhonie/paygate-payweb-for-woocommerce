@@ -14,7 +14,9 @@ sites Idealogic hosts. Site images build the plugin from a pinned tag of this fo
 
 - A paid order is never moved to Pending, Failed or Cancelled by the redirect, notify, cron or
   admin query.
-- A message that fails its checksum changes no order. It adds a note and logs the raw payload.
+- A message that fails its checksum changes no order, and its raw payload is logged. A notify
+  adds an order note. A redirect adds none and is answered with the account page, never a URL
+  carrying the order key, because anyone can send one for any order number.
 - The notify checksum is validated over the values exactly as PayGate sent them, in PayGate's
   documented field order.
 - The redirect handler enforces its checksum for every order and acts on the status PayWeb
