@@ -1,0 +1,44 @@
+name: '🏷️ Mark Released'
+# Marks the Azure DevOps work items a release shipped: `Released In`, the release comment and the
+# "on <environment>" comment on the items and their Testing and Deployment tasks. The work is done
+# by the shared workflow in christhonie/idealogic-workflows; see its header.
+#
+# This plugin has no deployment pipeline: a release is a `v<major>.<minor>.<patch>` tag pushed by
+# hand, and it reaches a site when that site's image is rebuilt. So the tag push marks the release
+# with no environment, and the operator dispatches this workflow with `stage` or `production` once
+# the site runs it. Component name: the Azure DevOps Area Path leaf, wordpress-paygate-plugin.
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (for example v4.6.0)
+        required: true
+        type: string
+      environment:
+        description: Environment the release has reached
+        required: true
+        type: choice
+        options: [stage, production, none]
+        default: none
+      dry-run:
+        description: Report what would change without writing to Azure DevOps
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  mark-released:
+    name: Mark released
+    uses: christhonie/idealogic-workflows/.github/workflows/mark-released.yml@main
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
+    with:
+      component: wordpress-paygate-plugin
+      tag: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+      environment: ${{ github.event_name == 'push' && 'none' || inputs.environment }}
+      dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
