@@ -15,5 +15,9 @@ jobs:
   copilot-review:
     name: Request Copilot Review
     uses: christhonie/idealogic-workflows/.github/workflows/copilot-review.yml@main
+    # The shared job needs pull-requests: write to post the review request. This repository's
+    # default workflow token is read-only, so the caller must grant it explicitly.
+    permissions:
+      pull-requests: write
     secrets:
       RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
