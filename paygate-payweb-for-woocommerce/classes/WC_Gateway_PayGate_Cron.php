@@ -108,6 +108,13 @@ class WC_Gateway_PayGate_Cron extends WC_Gateway_PayGate
      */
     public static function updateOrderStatus(string $transactionStatus, mixed $order, string $responseText): string
     {
+        // Re-read after the PayWeb query: the order list was loaded before the cron started its
+        // queries, and notify may have paid this order meanwhile.
+        $order = self::freshOrder($order->get_id());
+        if (!$order) {
+            return $responseText . '<br>Order not found; status unchanged by PayWeb Cron';
+        }
+
         // A paid order is never moved to Failed, Pending or Cancelled.
         if ($order->is_paid()) {
             return $responseText . '<br>Order already paid; status unchanged by PayWeb Cron';
