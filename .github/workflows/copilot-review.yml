@@ -2,6 +2,10 @@ name: '🤖 Copilot Review'
 # Requests a Copilot code review when a pull request opens or leaves draft, through the shared
 # workflow in christhonie/event. RELEASE_PAT is the operator's token: GitHub only accepts a review
 # request for Copilot from a user, not from the workflow token.
+# Pull requests from forks get no secrets and no write token, so none of the route's workflows
+# acts on them; a fork PR is reviewed by the repository's automatic Copilot review and never
+# carries the ready-to-merge label, which is the right signal for code the maintainer has not
+# adopted. The route serves the maintainer's own branches.
 
 on:
   pull_request:
@@ -10,6 +14,6 @@ on:
 jobs:
   copilot-review:
     name: Request Copilot Review
-    uses: christhonie/event/.github/workflows/copilot-review.yml@main
+    uses: christhonie/idealogic-workflows/.github/workflows/copilot-review.yml@main
     secrets:
       RELEASE_PAT: ${{ secrets.RELEASE_PAT }}

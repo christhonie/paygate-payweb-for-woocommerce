@@ -1,7 +1,7 @@
 name: '🏷️ Mark Released'
 # Marks the Azure DevOps work items a release shipped: `Released In`, the release comment and the
 # "on <environment>" comment on the items and their Testing and Deployment tasks. The work is done
-# by the shared workflow in christhonie/event; see its header.
+# by the shared workflow in christhonie/idealogic-workflows; see its header.
 #
 # This plugin has no deployment pipeline: a release is a `v<major>.<minor>.<patch>` tag pushed by
 # hand, and it reaches a site when that site's image is rebuilt. So the tag push marks the release
@@ -32,7 +32,7 @@ on:
 jobs:
   mark-released:
     name: Mark released
-    uses: christhonie/event/.github/workflows/mark-released.yml@main
+    uses: christhonie/idealogic-workflows/.github/workflows/mark-released.yml@main
     permissions:
       id-token: write
       contents: read

@@ -20,7 +20,7 @@ jobs:
     if: >-
       (github.event_name != 'pull_request' || github.event.label.name != 'ready-to-merge') &&
       (github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number)
-    uses: christhonie/event/.github/workflows/merge-eligibility.yml@main
+    uses: christhonie/idealogic-workflows/.github/workflows/merge-eligibility.yml@main
     permissions:
       pull-requests: write
       contents: read
