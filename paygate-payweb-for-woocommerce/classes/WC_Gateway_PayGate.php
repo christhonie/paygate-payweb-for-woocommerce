@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
+require_once 'WC_Gateway_PayGate_Rules.php';
 require_once 'WC_Gateway_PayGate_Portal.php';
 require_once 'WC_Gateway_PayGate_Admin_Actions.php';
 require_once 'WC_Gateway_PayGate_Cron.php';
@@ -1323,6 +1324,32 @@ class WC_Gateway_PayGate extends WC_Payment_Gateway
      *
      * @return array|object|null
      */
+    /**
+     * Load an order from storage, bypassing the caches of this request.
+     *
+     * Use it to re-read an order before deciding on its status after a slow call such as a
+     * PayWeb query: another handler, typically notify, may have paid it meanwhile, and
+     * wc_get_order() would otherwise return the copy cached before the call.
+     *
+     * @return WC_Order|false
+     */
+    public static function freshOrder(int $order_id)
+    {
+        if (function_exists('clean_post_cache')) {
+            clean_post_cache($order_id);
+        }
+        $orderCache = 'Automattic\WooCommerce\Caches\OrderCache';
+        if (function_exists('wc_get_container') && class_exists($orderCache)) {
+            try {
+                wc_get_container()->get($orderCache)->remove($order_id);
+            } catch (Throwable $e) {
+                // The cache is optional; a failure to clear it must not stop the handler.
+            }
+        }
+
+        return wc_get_order($order_id);
+    }
+
     protected static function getOrderNotes($order_id): object|array|null
     {
         global $wpdb;

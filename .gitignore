@@ -1,0 +1,4 @@
+# Test harness dependencies (the plugin's own vendor/ is committed and shipped)
+/vendor/
+/.phpunit.cache/
+/.phpunit.result.cache

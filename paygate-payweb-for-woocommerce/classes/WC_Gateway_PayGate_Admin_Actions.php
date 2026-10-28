@@ -80,16 +80,35 @@ class WC_Gateway_PayGate_Admin_Actions extends WC_Gateway_PayGate
         $responseText      = $gwp->paywebQueryText($response, $payRequestId);
         $transactionStatus = $gwp->paywebQueryStatus($response);
 
-        if ((int)$transactionStatus === 1) {
-            if (!$order->has_status(self::PROCESSING) && !$order->has_status(self::COMPLETED)) {
-                $order->payment_complete();
-                $responseText .= "<br>Order set to \"Processing\"";
-            }
+        $responseText = self::applyQueryStatus($order, (string)$transactionStatus, $responseText);
+        $order->add_order_note('Queried at ' . gmdate('Y-m-d H:i') . '<br>Response: <br>' . $responseText);
+    }
+
+    /**
+     * Apply the status from a PayWeb query to an order. A paid order is never moved.
+     *
+     * @return string the response text, with what was done appended
+     */
+    public static function applyQueryStatus($order, string $transactionStatus, string $responseText): string
+    {
+        // Re-read after the PayWeb query: notify may have paid the order while it ran.
+        $order = self::freshOrder($order->get_id());
+        if (!$order) {
+            return $responseText . '<br>Order not found; status unchanged';
+        }
+
+        if ($order->is_paid()) {
+            // A paid order is never moved to Failed, Pending or Cancelled.
+            $responseText .= '<br>Order already paid; status unchanged';
+        } elseif ((int)$transactionStatus === 1) {
+            $order->payment_complete();
+            $responseText .= "<br>Order set to \"Processing\"";
         } else {
             if (!$order->has_status(self::FAILED)) {
                 $order->update_status(self::FAILED);
             }
         }
-        $order->add_order_note('Queried at ' . gmdate('Y-m-d H:i') . '<br>Response: <br>' . $responseText);
+
+        return $responseText;
     }
 }

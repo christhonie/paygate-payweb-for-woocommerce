@@ -1,4 +1,39 @@
-# woocommerce-gateway
+# woocommerce-gateway (Idealogic fork)
+
+This is Idealogic's fork of [Payfast/woocommerce-gateway](https://github.com/Payfast/woocommerce-gateway),
+the PayGate PayWeb gateway for WooCommerce. It carries fixes that order-status changes need on the
+sites Idealogic hosts. Site images build the plugin from a pinned tag of this fork, never from a branch.
+
+| Branch or tag | Meaning |
+|---|---|
+| `master` | Mirrors the vendor's `master`; no fork changes |
+| `develop` | The fork's line: vendor release plus fixes |
+| `v<vendor>-idealogic.<n>` | A fork release, for example `v1.7.1-idealogic.1` |
+
+### What the fork changes
+
+- A paid order is never moved to Pending, Failed or Cancelled by the redirect, notify, cron or
+  admin query.
+- A message that fails its checksum changes no order, and its raw payload is logged. A notify
+  adds an order note. A redirect adds none and is answered with the account page, never a URL
+  carrying the order key, because anyone can send one for any order number.
+- The notify checksum is validated over the values exactly as PayGate sent them, in PayGate's
+  documented field order.
+- The redirect handler enforces its checksum for every order and acts on the status PayWeb
+  returns to the server-side query, never the one in the browser POST.
+- Order notes name the path actually taken: Redirect or Notify.
+
+### Tests
+
+```bash
+composer install
+vendor/bin/phpunit
+```
+
+The tests run the real handlers against an in-memory WordPress and WooCommerce (`tests/Support/`).
+The harness lives at the repository root, outside the plugin folder, so it never reaches a site.
+
+---
 
 ## Payfast Gateway module v1.7.1 for WooCommerce v10.6.2
 
