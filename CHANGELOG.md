@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] (Idealogic fork, based on 1.7.1)
+## [1.7.1-idl.1] - 2026-11-04 (Idealogic fork, based on 1.7.1)
 
 ### Fixed
 

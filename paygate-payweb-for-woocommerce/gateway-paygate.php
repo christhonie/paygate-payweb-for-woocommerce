@@ -6,7 +6,7 @@
  * Description: Receive payments using the South African Payfast Gateway payments provider.
  * Author: Payfast (Pty) Ltd
  * Author URI: https://payfast.io/
- * Version: 1.7.1
+ * Version: 1.7.1-idl.1
  * Requires at least: 6.0
  * Tested up to: 6.8
  * WC tested up to: 10.6
