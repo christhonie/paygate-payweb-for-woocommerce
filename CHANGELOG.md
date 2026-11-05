@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.7.1-idl.2] - 2026-11-05 (Idealogic fork, based on 1.7.1)
+
+### Fixed
+
+- WordPress no longer offers the upstream plugin as an update. PHP's `version_compare()` ranks
+  upstream `1.7.1` above `1.7.1-idl.1`, and the plugin keeps its WordPress.org slug, so a site
+  with plugin updates enabled could replace the fork and lose its redirect and checksum guards.
+  The header now declares `Update URI: false`. A new fork release is installed by changing the
+  pinned tag in the site image.
+
 ## [1.7.1-idl.1] - 2026-11-04 (Idealogic fork, based on 1.7.1)
 
 ### Fixed
